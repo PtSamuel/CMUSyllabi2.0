@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from urllib.parse import urljoin
 
 from .Constants import Constants
-from .Utils import get_and_unwrap, select_unique, WebDriver
+from .Utils import get_and_unwrap, select_unique, WebDriver, WebDriverException
 
 @dataclass
 class Immediate:
@@ -69,11 +69,15 @@ class ArchivedSemester:
     def __init__(self, name, href):
         self.name = name
         self.href = urljoin(Constants.CMU_CANVAS_URL.value, href)
-        driver = WebDriver(url=self.href)
-        html = driver.html
-        driver.close()
-        departments = html.select('div#wiki_page_show > div.show-content > p > a')
-        self.departments = [Department(d.getText(), d.get('href')) for d in departments]
+        try:
+            driver = WebDriver(url=self.href)
+            html = driver.html
+            driver.close()    
+            departments = html.select('div#wiki_page_show > div.show-content > p > a')
+            self.departments = [Department(d.getText(), d.get('href')) for d in departments]
+        except WebDriverException:
+            print(f'Failed to fetch {self.name} @ {self.href}, skipping.')
+            self.departments = []
     def __repr__(self):
         return self.name
 
