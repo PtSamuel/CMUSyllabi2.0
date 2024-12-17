@@ -28,10 +28,12 @@ class WebDriver:
         
         self.driver = None
         try:
+            print('Creating driver.')
             driver = webdriver.Chrome(options=options)
         except:
             raise WebDriverException('Failed to create driver.')
         try:
+            print('Visiting dummy domain.')
             driver.get('https://httpbin.org/headers')
             driver.add_cookie({'name': list(Constants.COOKIE.value.keys())[0], 'value': list(Constants.COOKIE.value.values())[0]})
         except:
@@ -45,6 +47,7 @@ class WebDriver:
     def get(self, url):
         assert self.sanity, 'Driver is abnormal.'
         try:
+            print(f'Visiting {url}') 
             self.driver.get(url)
         except:
             raise WebDriverException(f'Failed to go to {url}.')
