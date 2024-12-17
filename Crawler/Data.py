@@ -69,12 +69,14 @@ class ArchivedSemester:
     def __init__(self, name, href):
         self.name = name
         self.href = urljoin(Constants.CMU_CANVAS_URL.value, href)
+        print(F'Fetching {self.name} @ {self.href}.')
         try:
             driver = WebDriver(url=self.href)
             html = driver.html
             driver.close()    
             departments = html.select('div#wiki_page_show > div.show-content > p > a')
             self.departments = [Department(d.getText(), d.get('href')) for d in departments]
+            print(f'Found {len(self.departments)} departments.')
         except WebDriverException:
             print(f'Failed to fetch {self.name} @ {self.href}, skipping.')
             self.departments = []
