@@ -16,23 +16,18 @@ def main():
             for d in s.departments:
                 d.get(manager=manager)
                 print(f'Creating task for courses under {s}, {d}.')
+            break
         manager.wait()
         breakpoint()
         
-        # for s in sr.semesters:
-        #     for d in s.departments:
-        #         for c in d.courses['Available Syllabi']:
-        #             print(f'Fetching course {c} under {s}, {d}')
-        #             c.get()
-        #             archive = c.analyze(c.result)
-        #             if archive == None:
-        #                 print('abnormal:', c.href)
-        #             else:
-        #                 print(archive)
-        for c in sr.semesters[0].departments[0].courses['Available Syllabi']:
-            print(f'Fetching course {c} under {s}, {d}')
-            c.get()
+        for s in sr.semesters:
+            for d in s.departments:
+                for c in d.courses['Available Syllabi']:
+                    print(f'Fetching course {c} under {s}, {d}')
+                    c.get(manager=manager)
+            break
         manager.wait()
+        breakpoint()
         
     except Exception as e:
         print(e)
