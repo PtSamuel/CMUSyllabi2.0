@@ -1,18 +1,23 @@
 from Crawler.Utils import get_and_unwrap
 from Crawler.Data import SyllabusRegistry
 from Crawler.Constants import Constants
+from Crawler.Parallel import Parallel
 
 def main():
     try:        
         # Store to avoid accessing this page multiple times.
         print('Fetching syllabus registry base url:', Constants.CMU_SYLLABUS_REGISTRY_URL.value)
         html = get_and_unwrap(Constants.CMU_SYLLABUS_REGISTRY_URL.value)
-        sr = SyllabusRegistry(html=html)
+        sr = SyllabusRegistry(html=html, ignore_archived=True)
+        
+        manager = Parallel()
 
         for s in sr.semesters:
             for d in s.departments:
-                d.get()
+                d.get(manager=manager)
                 print(f'Fetching courses under {s}, {d}.')
+        manager.wait()
+        breakpoint()
         
         for s in sr.semesters:
             for d in s.departments:
@@ -24,7 +29,8 @@ def main():
                         print('abnormal:', c.href)
                     else:
                         print(archive)
-    except:
+    except Exception as e:
+        print(e)
         breakpoint()
     
 if __name__ == '__main__':

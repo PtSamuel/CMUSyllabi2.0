@@ -52,9 +52,17 @@ class Department:
     def get_category(html, cat: str):
         courses = html.select(f'div[aria-label="{cat}"] > div.content > ul.context_module_items > li[id^="context_module_item_"] > div.ig-row > div.ig-info > div.module-item-title > span.item_name > a.ig-title')
         return [Course(c.get('title'), c.get('href')) for c in courses]
-    def get(self):
-        html = get_and_unwrap(self.href, cookies=Constants.COOKIE.value)
-        self.courses = {cat: self.get_category(html, cat) for cat in Constants.COURSE_CATEGORIES.value}
+    def get(self, manager=None):
+        def callback():
+            html = get_and_unwrap(self.href, cookies=Constants.COOKIE.value)
+            if html is not None:
+                self.courses = {cat: self.get_category(html, cat) for cat in Constants.COURSE_CATEGORIES.value} 
+            else:
+                self.courses = None           
+        if manager:
+            manager.add(callback)
+        else:
+            callback()
 
 class Semester:
     def __init__(self, html):

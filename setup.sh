@@ -10,3 +10,6 @@ wget https://storage.googleapis.com/chrome-for-testing-public/131.0.6778.139/lin
 unzip chromedriver-linux64.zip && cd chromedriver-linux64
 sudo mv chromedriver /usr/local/bin/
 chromedriver --version && which chromedriver
+
+# ssh
+ssh -i "CMUSyllabi.pem" ec2-user@ec2-52-90-253-72.compute-1.amazonaws.com
