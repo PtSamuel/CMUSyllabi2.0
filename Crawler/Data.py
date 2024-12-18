@@ -1,8 +1,10 @@
 from dataclasses import dataclass
 from urllib.parse import urljoin
+import json
+from bs4 import BeautifulSoup
 
 from .Constants import Constants
-from .Utils import get_and_unwrap, select_unique, WebDriver, WebDriverException
+from .Utils import get_and_unwrap, select_unique, WebDriver, WebDriverException, index_back
 
 @dataclass
 class Immediate:
@@ -66,20 +68,33 @@ class Semester:
         return self.name
     
 class ArchivedSemester:
-    def __init__(self, name, href):
+    def __init__(self, name, href, use_js=True):
         self.name = name
         self.href = urljoin(Constants.CMU_CANVAS_URL.value, href)
         print(F'Fetching {self.name} @ {self.href}.')
-        try:
-            driver = WebDriver(url=self.href)
-            html = driver.html
-            driver.close()    
-            departments = html.select('div#wiki_page_show > div.show-content > p > a')
+        if use_js:
+            html = get_and_unwrap(self.href)
+            # Second <script>.
+            script = html.select('script')[1].getText()
+            # Select definition of variable 'ENV'.
+            script = script[script.index('ENV'):script.index('BRANDABLE_CSS_HANDLEBARS_INDEX')]
+            # Strip away trailing characters.
+            script = script[script.index('{'):index_back(script, ';')]
+            page = json.loads(script)
+            soup = BeautifulSoup(page['WIKI_PAGE']['body'], 'html.parser')
+            departments = soup.select('a')
             self.departments = [Department(d.getText(), d.get('href')) for d in departments]
-            print(f'Found {len(self.departments)} departments.')
-        except WebDriverException:
-            print(f'Failed to fetch {self.name} @ {self.href}, skipping.')
-            self.departments = []
+        else:
+            try:
+                driver = WebDriver(url=self.href)
+                html = driver.html
+                driver.close()    
+                departments = html.select('div#wiki_page_show > div.show-content > p > a')
+                self.departments = [Department(d.getText(), d.get('href')) for d in departments]
+                print(f'Found {len(self.departments)} departments.')
+            except WebDriverException:
+                print(f'Failed to fetch {self.name} @ {self.href}, skipping.')
+                self.departments = []
     def __repr__(self):
         return self.name
 

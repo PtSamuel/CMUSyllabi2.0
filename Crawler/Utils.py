@@ -17,6 +17,12 @@ def select_unique(html, *args, **kwargs):
     assert len(result) == 1, 'Selection is not unique!'
     return result[0]
 
+def index_back(s, c):
+    for i in reversed(range(len(s))):
+        if s[i] == c:
+            return i
+    return -1
+
 class WebDriverException(Exception):
     pass
 
