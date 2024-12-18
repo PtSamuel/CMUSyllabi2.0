@@ -13,3 +13,4 @@ chromedriver --version && which chromedriver
 
 # ssh
 ssh -i "CMUSyllabi.pem" ec2-user@ec2-52-90-253-72.compute-1.amazonaws.com
+ssh -i "CMUSyllabi.pem" ec2-user@ec2-52-91-206-189.compute-1.amazonaws.com
