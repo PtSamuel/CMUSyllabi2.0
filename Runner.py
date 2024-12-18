@@ -14,8 +14,8 @@ def main():
 
         for s in sr.semesters:
             for d in s.departments:
-                d.get(manager=manager)
                 print(f'Creating task for courses under {s}, {d}.')
+                manager.add(lambda: d.get())
             break
         manager.wait()
         breakpoint()
@@ -24,7 +24,7 @@ def main():
             for d in s.departments:
                 for c in d.courses['Available Syllabi']:
                     print(f'Fetching course {c} under {s}, {d}')
-                    c.get(manager=manager)
+                    manager.add(lambda: c.get())
             break
         manager.wait()
         breakpoint()
