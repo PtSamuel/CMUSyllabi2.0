@@ -15,7 +15,9 @@ def main():
         for s in sr.semesters:
             for d in s.departments:
                 print(f'Creating task for courses under {s}, {d}.')
-                manager.add(lambda: d.get())
+                def action():
+                    d.get()
+                manager.add(action)
             break
         manager.wait()
         breakpoint()
