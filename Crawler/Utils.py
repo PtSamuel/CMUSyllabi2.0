@@ -1,22 +1,13 @@
 import requests
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
 from .Constants import Constants
 
-retries = Retry(total=3)
-session = requests.Session()
-adapter = HTTPAdapter(max_retries=retries)
-session.mount("http://", adapter)
-session.mount("https://", adapter)
-
 def get_and_unwrap(*args, **kwargs) -> BeautifulSoup:
-    global session
     try:
-        response = session.get(*args, **kwargs)
+        response = requests.get(*args, **kwargs)
         assert response.status_code == 200
         return BeautifulSoup(response.text, 'html.parser')
     except:
