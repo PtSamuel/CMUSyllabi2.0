@@ -13,3 +13,4 @@ class Parallel:
         for _ in as_completed(self.jobs):
             pbar.update()
         # wait(self.jobs)
+        self.jobs = []

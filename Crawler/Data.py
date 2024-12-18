@@ -22,8 +22,21 @@ class Course:
         self.cat = cat
     def __repr__(self):
         return self.name
-    def get(self):
-        self.result = get_and_unwrap(self.href, cookies=Constants.COOKIE.value)
+    def get(self, manager=None):
+        def callback():
+            html = get_and_unwrap(self.href, cookies=Constants.COOKIE.value)
+            if html is not None:
+                self.html = html
+                self.analyze(html)
+                if self.archive is None:
+                    print('abnormal:', self.href)
+            else:
+                self.html = None           
+                self.archive = None           
+        if manager:
+            manager.add(callback)
+        else:
+            callback()
     def analyze(self, html):
         archive = None
         try:
@@ -33,7 +46,6 @@ class Course:
             archive = Immediate(syllabus_url, file_name)
         except: 
             pass
-        
         try:
             select_unique(html, 'div#wiki_page_show')
             archive = Webpage(self.href)

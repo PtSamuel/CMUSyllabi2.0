@@ -15,20 +15,25 @@ def main():
         for s in sr.semesters:
             for d in s.departments:
                 d.get(manager=manager)
-                print(f'Fetching courses under {s}, {d}.')
+                print(f'Creating task for courses under {s}, {d}.')
         manager.wait()
         breakpoint()
         
-        for s in sr.semesters:
-            for d in s.departments:
-                for c in d.courses['Available Syllabi']:
-                    print(f'Fetching course {c} under {s}, {d}')
-                    c.get()
-                    archive = c.analyze(c.result)
-                    if archive == None:
-                        print('abnormal:', c.href)
-                    else:
-                        print(archive)
+        # for s in sr.semesters:
+        #     for d in s.departments:
+        #         for c in d.courses['Available Syllabi']:
+        #             print(f'Fetching course {c} under {s}, {d}')
+        #             c.get()
+        #             archive = c.analyze(c.result)
+        #             if archive == None:
+        #                 print('abnormal:', c.href)
+        #             else:
+        #                 print(archive)
+        for c in sr.semesters[0].departments[0].courses['Available Syllabi']:
+            print(f'Fetching course {c} under {s}, {d}')
+            c.get()
+        manager.wait()
+        
     except Exception as e:
         print(e)
         breakpoint()
