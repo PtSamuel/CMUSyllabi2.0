@@ -5,8 +5,8 @@ class Parallel:
     def __init__(self, max_workers=32):
         self.executor = ThreadPoolExecutor(max_workers=max_workers)
         self.jobs = []
-    def add(self, f):
-        future = self.executor.submit(f)
+    def add(self, f, *args):
+        future = self.executor.submit(f, *args)
         self.jobs.append(future)
     def wait(self):
         pbar = tqdm(range(len(self.jobs)))
