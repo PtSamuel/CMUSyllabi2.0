@@ -1,5 +1,7 @@
 import pickle
 import argparse
+from tqdm import tqdm
+import traceback
 
 from Crawler.Utils import get_and_unwrap
 from Crawler.Data import SyllabusRegistry
@@ -8,41 +10,58 @@ from Crawler.Parallel import Parallel
 
 def main(args):
     try:        
-        # Store to avoid accessing this page multiple times.
-        print('Fetching syllabus registry base url:', Constants.CMU_SYLLABUS_REGISTRY_URL.value)
-        html = get_and_unwrap(Constants.CMU_SYLLABUS_REGISTRY_URL.value)
         
+        if args.checkpoint is not None:
+            print('Loading checkpoint:', args.checkpoint)
+            sr = pickle.load(open(args.checkpoint, 'rb'))
+        else:
+            # Store to avoid accessing this page multiple times.
+            print('Fetching syllabus registry base url:', Constants.CMU_SYLLABUS_REGISTRY_URL.value)
+            html = get_and_unwrap(Constants.CMU_SYLLABUS_REGISTRY_URL.value)
+            sr = SyllabusRegistry(html=html, ignore_archived=args.debug)
+                
         if args.debug:
-            sr = SyllabusRegistry(html=html, ignore_archived=True)
             semesters = sr.semesters[:1]
         else:
-            sr = SyllabusRegistry(html=html, ignore_archived=False)
             semesters = sr.semesters
         
         manager = Parallel()
 
-        for s in semesters:
-            for d in s.departments:
-                print(f'Creating task for courses under {s}, {d}.')
-                def action(dep):
-                    dep.get()
-                manager.add(action, d)
-        manager.wait()
+        if args.checkpoint is None:
+            pbar = tqdm(sum(len(semester.departments) for semester in semesters))
+            for s in semesters:
+                for d in s.departments:
+                    pbar.set_description(f'{s.acronym}-{d.acronym}')
+                    pbar.update()
+                    def action(dep):
+                        dep.get()
+                    manager.add(action, d)
+            manager.wait()
         
         if args.debug:
             breakpoint()
         
+        pbar = tqdm(sum(sum(department.course_count for department in semester.departments) for semester in semesters))
         for s in semesters:
             for d in s.departments:
-                for c in d.courses['Available Syllabi']:
-                    print(f'Fetching course {c} under {s}, {d}')
-                    def action(course):
-                        course.get()
-                    manager.add(action, c)
+                if d.processed:
+                    if d.courses is None:
+                        breakpoint()
+                    for c in d.courses['Available Syllabi']:
+                        pbar.set_description(f'{s.acronym}-{c.acronym}')
+                        pbar.update()
+                        def action(course):
+                            course.get()
+                        manager.add(action, c)
+                else:
+                    print(f'Department {d} under {s} is not processed, skipping.')
+                    
         manager.wait()
         
     except Exception as e:
         print(f'Encountered error: {e}.')
+        traceback.print_exc()
+        breakpoint()
     
     print('Pickling checkpoint.')
     try:
@@ -54,6 +73,7 @@ def main(args):
         
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='Runner')
+    parser.add_argument('-c', '--checkpoint')
     parser.add_argument('-d', '--debug', action='store_true')
     args = parser.parse_args()
     main(args)
