@@ -83,11 +83,8 @@ class Department:
     def get(self):
         html = get_and_unwrap(self.href, cookies=Constants.COOKIE.value)
         if html is not None:
-            self.processed = True
             self.courses = {cat: self.get_category(html, cat) for cat in Constants.COURSE_CATEGORIES.value} 
-            if self.courses is None:
-                # ?
-                breakpoint()
+            self.processed = True
     @property
     def course_count(self):
         if self.courses is None:

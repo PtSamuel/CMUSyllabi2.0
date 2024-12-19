@@ -45,9 +45,7 @@ def main(args):
         for s in semesters:
             for d in s.departments:
                 if d.processed:
-                    if d.courses is None:
-                        breakpoint()
-                    for c in d.courses['Available Syllabi']:
+                    for c in d.courses['Available Syllabi'] + d.courses['Individualized Experiences']:
                         pbar.set_description(f'{s.acronym}-{c.acronym}')
                         pbar.update()
                         def action(course):
