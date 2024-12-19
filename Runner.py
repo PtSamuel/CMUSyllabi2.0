@@ -3,6 +3,8 @@ from Crawler.Data import SyllabusRegistry
 from Crawler.Constants import Constants
 from Crawler.Parallel import Parallel
 
+import pickle
+
 def main():
     try:        
         # Store to avoid accessing this page multiple times.
@@ -31,11 +33,17 @@ def main():
                     manager.add(action, c)
             break
         manager.wait()
-        breakpoint()
         
     except Exception as e:
-        print(e)
-        breakpoint()
+        print(f'Encountered error: {e}.')
     
+    print('Pickling checkpoint.')
+    try:
+        with open('syllabus_registry.pkl', 'wb') as pkl:
+            pickle.dump(sr, pkl, pickle.HIGHEST_PROTOCOL)
+    except:
+        print('Failed to pickle.')
+        breakpoint()
+        
 if __name__ == '__main__':
     main()
