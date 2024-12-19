@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from urllib.parse import urljoin
 import json
 from bs4 import BeautifulSoup
+import re
 
 from .Constants import Constants
 from .Utils import get_and_unwrap, select_unique, WebDriver, WebDriverException, index_back
@@ -18,7 +19,11 @@ class Webpage:
 class Course:
     def __init__(self, name, href):
         self.name = name
-        self.acronym = name[:name.index(':')]
+        try:
+            self.acronym = re.search(r'\d{5}(-\w*)?', name).group
+        except:
+            self.acronym = name
+            print(f'Failed to acronymize course {name}.')
         self.href = urljoin(Constants.CMU_CANVAS_URL.value, href)
         self.processed = False
         self.archive = None
@@ -61,7 +66,11 @@ class Course:
 class Department:
     def __init__(self, name, href):
         self.name = name
-        self.acronym = name[index_back(name, '(') + 1:index_back(name, ')')]
+        try:
+            self.acronym = name[index_back(name, '(') + 1:index_back(name, ')')]
+        except:
+            self.acronym = name
+            print(f'Failed to acronymize department {name}.')
         self.href = href
         self.processed = False
         self.courses = None
@@ -101,7 +110,11 @@ class Semester:
     def __init__(self, html):
         name = html.get('aria-label')
         self.name = name
-        self.acronym = name[index_back(name, '(') + 1:index_back(name, ')')]
+        try:
+            self.acronym = name[index_back(name, '(') + 1:index_back(name, ')')]
+        except:
+            self.acronym = name
+            print(f'Failed to acronymize semester {name}.')
         departments = html.select('div.content > ul.context_module_items > li[id^="context_module_item_"] > div.ig-row > div.ig-info > div.module-item-title > span.item_name > a.external_url_link')
         self.departments = [Department(d.get('title'), d.get('href')) for d in departments]
     def __repr__(self):
