@@ -20,40 +20,50 @@ class Course:
         self.name = name
         self.href = urljoin(Constants.CMU_CANVAS_URL.value, href)
         self.cat = cat
+        self.html = None
+        self.archive = None
     def __repr__(self):
         return self.name
     def get(self):
         html = get_and_unwrap(self.href, cookies=Constants.COOKIE.value)
         if html is not None:
             self.html = html
-            self.analyze(html)
+            self.archive = self.analyze(html)
             if self.archive is None:
-                print('abnormal:', self.href)
-        else:
-            self.html = None           
-            self.archive = None           
+                print('abnormal:', self.href)       
     def analyze(self, html):
-        archive = None
         try:
             # Immediate
             syllabus_url = select_unique(html, 'div#content a').get('href')
             file_name = select_unique(html, 'div#content h2').getText()
-            archive = Immediate(syllabus_url, file_name)
+            return Immediate(syllabus_url, file_name)
         except: 
             pass
-        if archive is None:
-            try:
-                select_unique(html, 'div#wiki_page_show')
-                archive = Webpage(self.href)
-            except:
-                pass
-        self.archive = archive
-        return archive
+        try:
+            select_unique(html, 'div#wiki_page_show')
+            return Webpage(self.href)
+        except:
+            pass
+        return None
+    def __reduce__(self):
+        return (
+            self.__class__.__new__,
+            (self.__class__,),
+            {
+                'name': self.name,
+                'href': self.href,
+                'cat': self.cat,
+                'html': self.html,
+                'archive': self.archive
+            }
+        )
     
 class Department:
     def __init__(self, name, href):
         self.name = name
         self.href = href
+        self.html = None
+        self.courses = None
     def __repr__(self):
         return self.name
     @staticmethod
@@ -63,20 +73,37 @@ class Department:
     def get(self):
         html = get_and_unwrap(self.href, cookies=Constants.COOKIE.value)
         if html is not None:
+            self.html = html
             self.courses = {cat: self.get_category(html, cat) for cat in Constants.COURSE_CATEGORIES.value} 
-        else:
-            self.courses = None
+    def __reduce__(self):
+        return (
+            self.__class__.__new__,
+            (self.__class__,),
+            {
+                'name': self.name,
+                'href': self.href,
+                'html': self.html,
+                'courses': self.courses
+            }
+        )
 
 class Semester:
     def __init__(self, html):
         self.html = html
+        self.name = html.get('aria-label')
         departments = html.select('div.content > ul.context_module_items > li[id^="context_module_item_"] > div.ig-row > div.ig-info > div.module-item-title > span.item_name > a.external_url_link')
         self.departments = [Department(d.get('title'), d.get('href')) for d in departments]
-    @property 
-    def name(self):
-        return self.html.get('aria-label')
     def __repr__(self):
         return self.name
+    def __reduce__(self):
+        return (
+            self.__class__.__new__,
+            (self.__class__,),
+            {
+                'name': self.name,
+                'departments': self.departments
+            }
+        )
     
 class ArchivedSemester:
     def __init__(self, name, href, use_js=True):
@@ -108,6 +135,16 @@ class ArchivedSemester:
                 self.departments = []
     def __repr__(self):
         return self.name
+    def __reduce__(self):
+        return (
+            self.__class__.__new__,
+            (self.__class__,),
+            {
+                'name': self.name,
+                'href': self.href,
+                'departments': self.departments
+            }
+        )
 
 class SyllabusRegistry:
     def __init__(self, html=None, ignore_archived=False):
@@ -120,3 +157,11 @@ class SyllabusRegistry:
         if not ignore_archived:
             archived_semesters = html.select('div[aria-label="Archive"] > div.content > ul > li > div.ig-row > div.ig-info > div.module-item-title > span.item_name > a')
             self.semesters += [ArchivedSemester(s.get('title'), s.get('href')) for s in archived_semesters]
+    def __reduce__(self):
+        return (
+            self.__class__.__new__,
+            (self.__class__,),
+            {
+                'semesters': self.semesters
+            }
+        )
