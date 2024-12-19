@@ -20,7 +20,7 @@ class Course:
     def __init__(self, name, href):
         self.name = name
         try:
-            self.acronym = re.search(r'\d{5}(-\w*)?', name).group
+            self.acronym = re.search(r'\d{5}(-\w*)?', name).group()
         except:
             self.acronym = name
             print(f'Failed to acronymize course {name}.')

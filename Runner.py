@@ -28,7 +28,7 @@ def main(args):
         manager = Parallel()
 
         if args.checkpoint is None:
-            pbar = tqdm(sum(len(semester.departments) for semester in semesters))
+            pbar = tqdm(total=sum(len(semester.departments) for semester in semesters))
             for s in semesters:
                 for d in s.departments:
                     pbar.set_description(f'{s.acronym}-{d.acronym}')
@@ -41,7 +41,7 @@ def main(args):
         if args.debug:
             breakpoint()
         
-        pbar = tqdm(sum(sum(department.course_count for department in semester.departments) for semester in semesters))
+        pbar = tqdm(total=sum(sum(department.course_count for department in semester.departments) for semester in semesters))
         for s in semesters:
             for d in s.departments:
                 if d.processed:
