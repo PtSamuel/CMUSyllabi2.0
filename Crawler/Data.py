@@ -16,18 +16,17 @@ class Webpage:
     webpage_url: str
 
 class Course:
-    def __init__(self, name, href, cat : str='Available Syllabi'):
+    def __init__(self, name, href):
         self.name = name
         self.href = urljoin(Constants.CMU_CANVAS_URL.value, href)
-        self.cat = cat
-        self.html = None
+        self.processed = False
         self.archive = None
     def __repr__(self):
         return self.name
     def get(self):
         html = get_and_unwrap(self.href, cookies=Constants.COOKIE.value)
         if html is not None:
-            self.html = html
+            self.processed = True
             self.archive = self.analyze(html)
             if self.archive is None:
                 print('abnormal:', self.href)       
@@ -52,8 +51,7 @@ class Course:
             {
                 'name': self.name,
                 'href': self.href,
-                'cat': self.cat,
-                'html': self.html,
+                'processed': self.processed,
                 'archive': self.archive
             }
         )
@@ -62,7 +60,7 @@ class Department:
     def __init__(self, name, href):
         self.name = name
         self.href = href
-        self.html = None
+        self.processed = False
         self.courses = None
     def __repr__(self):
         return self.name
@@ -73,7 +71,7 @@ class Department:
     def get(self):
         html = get_and_unwrap(self.href, cookies=Constants.COOKIE.value)
         if html is not None:
-            self.html = html
+            self.processed = True
             self.courses = {cat: self.get_category(html, cat) for cat in Constants.COURSE_CATEGORIES.value} 
     def __reduce__(self):
         return (
@@ -82,14 +80,13 @@ class Department:
             {
                 'name': self.name,
                 'href': self.href,
-                'html': self.html,
+                'processed': self.processed,
                 'courses': self.courses
             }
         )
 
 class Semester:
     def __init__(self, html):
-        self.html = html
         self.name = html.get('aria-label')
         departments = html.select('div.content > ul.context_module_items > li[id^="context_module_item_"] > div.ig-row > div.ig-info > div.module-item-title > span.item_name > a.external_url_link')
         self.departments = [Department(d.get('title'), d.get('href')) for d in departments]
