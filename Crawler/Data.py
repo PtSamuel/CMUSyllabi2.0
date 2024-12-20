@@ -15,6 +15,10 @@ class PDF:
 @dataclass
 class Webpage:
     href: str
+    
+@dataclass
+class Unknown:
+    href: str
 
 class Course:
     def __init__(self, name, href):
@@ -32,21 +36,21 @@ class Course:
     def get(self):
         html = get_and_unwrap(self.href, cookies=Constants.COOKIE.value)
         if html is not None:
-            self.processed = True
             self.archive = self.analyze(html)
+            self.processed = True
             if self.archive is None:
                 print('abnormal:', self.href)       
     def analyze(self, html):
         try:
             # PDF
-            syllabus_url = select_unique(html, 'div#content a').get('href')
+            syllabus_url = select_unique(html, 'div#content > div > span > a[download="true"]').get('href')
             file_name = select_unique(html, 'div#content h2').getText()
             return PDF(syllabus_url, file_name)
         except: 
             pass
         try:
             # Webpage
-            select_unique(html, 'div#wiki_page_show')
+            select_unique(html, 'div#wiki_page_show') # Abort if no found.
             return Webpage(self.href)
         except:
             pass
@@ -87,7 +91,7 @@ class Department:
             self.courses = {cat: self.get_category(html, cat) for cat in Constants.COURSE_CATEGORIES.value} 
             self.processed = True
             if self.course_count == 0:
-                print(f'Department {self.name} has no course! Check your cookies.')
+                print(f'Department {self.name} @ {self.href} has no course! Check your cookies.')
     @property
     def course_count(self):
         if self.courses is None:

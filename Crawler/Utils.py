@@ -8,15 +8,13 @@ from .Constants import Constants
 def get_and_unwrap(*args, **kwargs) -> BeautifulSoup:
     try:
         response = requests.get(*args, **kwargs)
-        assert response.status_code == 200
+        assert response.status_code != 401
         return BeautifulSoup(response.text, 'html.parser')
     except:
         return None
 
 def select_unique(html, *args, **kwargs):
     result = html.select(*args, **kwargs)
-    if result == []:
-        return None
     assert len(result) == 1, 'Selection is not unique!'
     return result[0]
 
