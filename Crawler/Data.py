@@ -8,7 +8,7 @@ from .Constants import Constants
 from .Utils import get_and_unwrap, select_unique, WebDriver, WebDriverException, index_back
 
 @dataclass
-class Immediate:
+class PDF:
     syllabus_url: str
     file_name: str
     
@@ -38,13 +38,14 @@ class Course:
                 print('abnormal:', self.href)       
     def analyze(self, html):
         try:
-            # Immediate
+            # PDF
             syllabus_url = select_unique(html, 'div#content a').get('href')
             file_name = select_unique(html, 'div#content h2').getText()
-            return Immediate(syllabus_url, file_name)
+            return PDF(syllabus_url, file_name)
         except: 
             pass
         try:
+            # Webpage
             select_unique(html, 'div#wiki_page_show')
             return Webpage(self.href)
         except:
