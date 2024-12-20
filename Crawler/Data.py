@@ -90,12 +90,18 @@ class Department:
     def get_category(html, cat: str):
         courses = html.select(f'div[aria-label="{cat}"] > div.content > ul.context_module_items > li[id^="context_module_item_"] > div.ig-row > div.ig-info > div.module-item-title > span.item_name > a.ig-title')
         return [Course(c.get('title'), c.get('href')) for c in courses]
+    @staticmethod
+    def page_sanity(html):
+        return any(len(html.select(f'div[aria-label="{cat}"]')) > 0 for cat in Constants.COURSE_CATEGORIES.value)
     def get(self):
         self.status = Status.FAILURE
         html = get_and_unwrap(self.href, cookies=Constants.COOKIE.value)
         if html is not None:
-            self.courses = {cat: self.get_category(html, cat) for cat in Constants.COURSE_CATEGORIES.value} 
-            self.status = Status.SUCCESS
+            if Department.page_sanity(html):
+                self.courses = {cat: self.get_category(html, cat) for cat in Constants.COURSE_CATEGORIES.value} 
+                self.status = Status.SUCCESS
+            else:
+                print(f'Department {self.name} @ {self.href} has no sanity.') 
     @property
     def course_count(self):
         if self.courses is None:
