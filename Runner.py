@@ -13,11 +13,11 @@ def main(args):
     try:        
         
         if args.checkpoint is not None:
-            print('Loading checkpoint:', args.checkpoint)
+            print(f'Loading checkpoint: {args.checkpoint}.')
             sr = pickle.load(open(args.checkpoint, 'rb'))
         else:
             # Store to avoid accessing this page multiple times.
-            print('Fetching syllabus registry base url:', Constants.CMU_SYLLABUS_REGISTRY_URL.value)
+            print(f'Fetching syllabus registry base url: {Constants.CMU_SYLLABUS_REGISTRY_URL.value}.')
             html = get_and_unwrap(Constants.CMU_SYLLABUS_REGISTRY_URL.value)
             sr = SyllabusRegistry(html=html, ignore_archived=args.debug)
                 

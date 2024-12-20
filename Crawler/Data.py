@@ -39,7 +39,7 @@ class Course:
             self.archive = self.analyze(html)
             self.processed = True
             if self.archive is None:
-                print('abnormal:', self.href)       
+                print(f'Abnormal: {self.href}.')       
     def analyze(self, html):
         try:
             # PDF

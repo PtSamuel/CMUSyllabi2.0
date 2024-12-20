@@ -8,7 +8,7 @@ from .Constants import Constants
 def get_and_unwrap(*args, **kwargs) -> BeautifulSoup:
     try:
         response = requests.get(*args, **kwargs)
-        assert response.status_code != 401
+        assert response.status_code != 404
         return BeautifulSoup(response.text, 'html.parser')
     except:
         return None
