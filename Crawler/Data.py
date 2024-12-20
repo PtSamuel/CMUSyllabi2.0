@@ -9,12 +9,12 @@ from .Utils import get_and_unwrap, select_unique, WebDriver, WebDriverException,
 
 @dataclass
 class PDF:
-    syllabus_href: str
-    syllabus_name: str
+    href: str
+    name: str
     
 @dataclass
 class Webpage:
-    webpage_href: str
+    href: str
 
 class Course:
     def __init__(self, name, href):
@@ -86,6 +86,8 @@ class Department:
         if html is not None:
             self.courses = {cat: self.get_category(html, cat) for cat in Constants.COURSE_CATEGORIES.value} 
             self.processed = True
+            if self.course_count == 0:
+                print(f'Department {self.name} has no course! Check your cookies.')
     @property
     def course_count(self):
         if self.courses is None:
