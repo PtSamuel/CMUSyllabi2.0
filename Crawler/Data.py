@@ -9,18 +9,18 @@ from .Utils import get_and_unwrap, select_unique, WebDriver, WebDriverException,
 
 @dataclass
 class PDF:
-    syllabus_url: str
-    file_name: str
+    syllabus_href: str
+    syllabus_name: str
     
 @dataclass
 class Webpage:
-    webpage_url: str
+    webpage_href: str
 
 class Course:
     def __init__(self, name, href):
         self.name = name
         try:
-            self.acronym = re.search(r'\d{5}(-\w*)?', name).group()
+            self.acronym = re.search(r'\d{2}-?\d{3}(-\w*)?', name).group()
         except:
             self.acronym = None
             print(f'Failed to acronymize course {name}.')
