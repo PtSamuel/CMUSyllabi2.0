@@ -22,7 +22,7 @@ class Course:
         try:
             self.acronym = re.search(r'\d{5}(-\w*)?', name).group()
         except:
-            self.acronym = name
+            self.acronym = None
             print(f'Failed to acronymize course {name}.')
         self.href = urljoin(Constants.CMU_CANVAS_URL.value, href)
         self.processed = False
@@ -70,7 +70,7 @@ class Department:
         try:
             self.acronym = name[index_back(name, '(') + 1:index_back(name, ')')]
         except:
-            self.acronym = name
+            self.acronym = None
             print(f'Failed to acronymize department {name}.')
         self.href = href
         self.processed = False
@@ -111,7 +111,7 @@ class Semester:
         try:
             self.acronym = name[index_back(name, '(') + 1:index_back(name, ')')]
         except:
-            self.acronym = name
+            self.acronym = None
             print(f'Failed to acronymize semester {name}.')
         departments = html.select('div.content > ul.context_module_items > li[id^="context_module_item_"] > div.ig-row > div.ig-info > div.module-item-title > span.item_name > a.external_url_link')
         self.departments = [Department(d.get('title'), d.get('href')) for d in departments]

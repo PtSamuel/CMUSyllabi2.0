@@ -29,7 +29,7 @@ def main(args):
         manager = Parallel()
 
         if args.checkpoint is None:
-            print('Creating jobs for every semester.')
+            print('Creating a job for every semester.')
             pbar = tqdm(total=sum(len(semester.departments) for semester in semesters))
             for s in semesters:
                 for d in s.departments:
@@ -43,7 +43,7 @@ def main(args):
         if args.debug:
             breakpoint()
         
-        print('Creating jobs for every course.')
+        print('Creating a job for every course.')
         pbar = tqdm(total=sum(sum(department.course_count for department in semester.departments) for semester in semesters))
         for s in semesters:
             for d in s.departments:
