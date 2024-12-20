@@ -3,6 +3,7 @@ from urllib.parse import urljoin
 import json
 from bs4 import BeautifulSoup
 import re
+from enum import Enum
 
 from .Constants import Constants
 from .Utils import get_and_unwrap, select_unique, WebDriver, WebDriverException, index_back
@@ -19,6 +20,11 @@ class Webpage:
 @dataclass
 class Unknown:
     href: str
+    
+class Status(Enum):
+    EMPTY = 0
+    FAILURE = 1
+    SUCCESS = 2
 
 class Course:
     def __init__(self, name, href):
@@ -29,17 +35,16 @@ class Course:
             self.acronym = None
             print(f'Failed to acronymize course {name}.')
         self.href = urljoin(Constants.CMU_CANVAS_URL.value, href)
-        self.processed = False
+        self.status = Status.EMPTY
         self.archive = None
     def __repr__(self):
         return self.name
     def get(self):
+        self.status = Status.FAILURE
         html = get_and_unwrap(self.href, cookies=Constants.COOKIE.value)
         if html is not None:
             self.archive = self.analyze(html)
-            self.processed = True
-            if self.archive is None:
-                print(f'Abnormal: {self.href}.')       
+            self.status = Status.SUCCESS
     def analyze(self, html):
         try:
             # PDF
@@ -54,7 +59,7 @@ class Course:
             return Webpage(self.href)
         except:
             pass
-        return None
+        return Unknown(self.href)
     def __reduce__(self):
         return (
             self.__class__.__new__,
@@ -63,7 +68,7 @@ class Course:
                 'name': self.name,
                 'acronym': self.acronym,
                 'href': self.href,
-                'processed': self.processed,
+                'status': self.status,
                 'archive': self.archive
             }
         )
@@ -77,7 +82,7 @@ class Department:
             self.acronym = None
             print(f'Failed to acronymize department {name}.')
         self.href = href
-        self.processed = False
+        self.status = Status.EMPTY
         self.courses = None
     def __repr__(self):
         return self.name
@@ -86,12 +91,11 @@ class Department:
         courses = html.select(f'div[aria-label="{cat}"] > div.content > ul.context_module_items > li[id^="context_module_item_"] > div.ig-row > div.ig-info > div.module-item-title > span.item_name > a.ig-title')
         return [Course(c.get('title'), c.get('href')) for c in courses]
     def get(self):
+        self.status = Status.FAILURE
         html = get_and_unwrap(self.href, cookies=Constants.COOKIE.value)
         if html is not None:
             self.courses = {cat: self.get_category(html, cat) for cat in Constants.COURSE_CATEGORIES.value} 
-            self.processed = True
-            if self.course_count == 0:
-                print(f'Department {self.name} @ {self.href} has no course! Check your cookies.')
+            self.status = Status.SUCCESS
     @property
     def course_count(self):
         if self.courses is None:
@@ -105,7 +109,7 @@ class Department:
                 'name': self.name,
                 'acronym': self.acronym,
                 'href': self.href,
-                'processed': self.processed,
+                'status': self.status,
                 'courses': self.courses
             }
         )

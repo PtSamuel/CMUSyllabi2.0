@@ -4,7 +4,7 @@ from tqdm import tqdm
 import traceback
 
 from Crawler.Utils import get_and_unwrap
-from Crawler.Data import SyllabusRegistry
+from Crawler.Data import SyllabusRegistry, Status
 from Crawler.Constants import Constants
 from Crawler.Parallel import Parallel
 
@@ -47,7 +47,7 @@ def main(args):
         pbar = tqdm(total=sum(sum(department.course_count for department in semester.departments) for semester in semesters))
         for s in semesters:
             for d in s.departments:
-                if d.processed:
+                if d.status == Status.SUCCESS:
                     for c in d.courses['Available Syllabi'] + d.courses['Individualized Experiences']:
                         pbar.set_description(f'{s.acronym}-{c.acronym}')
                         pbar.update()
@@ -55,7 +55,7 @@ def main(args):
                             course.get()
                         manager.add(action, c)
                 else:
-                    print(f'Department {d} under {s} is not processed, skipping.')
+                    print(f'Department {d} under {s} is not visited or failed, skipping.')
                     
         manager.wait()
         
