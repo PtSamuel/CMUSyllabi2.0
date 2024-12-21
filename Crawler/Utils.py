@@ -5,10 +5,12 @@ from selenium.webdriver.chrome.options import Options
 
 from .Constants import Constants
 
+STATUS_CODE_BLACK_LIST = [401, 403, 404]
+
 def get_and_unwrap(*args, **kwargs) -> BeautifulSoup:
     try:
         response = requests.get(*args, **kwargs)
-        assert response.status_code != 404
+        assert response.status_code not in STATUS_CODE_BLACK_LIST
         return BeautifulSoup(response.text, 'html.parser')
     except:
         return None

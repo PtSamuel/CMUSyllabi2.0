@@ -192,7 +192,7 @@ class SyllabusRegistry:
         if html is None:
             html = get_and_unwrap(Constants.CMU_SYLLABUS_REGISTRY_URL.value)
         self.html = html
-        semesters = html.select('div[aria-label^="Fall"], div[aria-label^="String"], div[aria-label^="Summer"]')
+        semesters = html.select('div[aria-label^="Fall"], div[aria-label^="Spring"], div[aria-label^="Summer"]')
         self.semesters = [Semester(s) for s in semesters]
         
         if not ignore_archived:
