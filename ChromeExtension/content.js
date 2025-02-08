@@ -118,27 +118,33 @@ function run() {
 
 }
 
-window.addEventListener('load', function() {
-    // Call your function when the page fully loads (after redirect/refresh)
-    console.log('Page has finished loading!');
+let observer;
 
+function check_website() {
     if(document.location.href.startsWith(CMUCourses_href)) {
         search_results = document.querySelector('div.flex-1.overflow-y-auto > div.p-6')
-        const observer = new MutationObserver(() => {
-            console.log('Dynamic content has changed!');
-            console.log('Wait for a bit.');
-            setTimeout(() => {
-                run();
-            }, 500);
-           
-        });
-        const config = { childList: true, subtree: true };
-        observer.observe(search_results, config);
+        
+        console.log(search_results);
+        if(search_results.length > 0) {
+            if(!observer) {
+                observer = new MutationObserver(() => {
+                    console.log('Dynamic content has changed!');
+                    console.log('Wait for a bit.');
+                    setTimeout(() => {
+                        run();
+                    }, 500);
+                    
+                });
+                const config = { childList: true, subtree: true };
+                observer.observe(search_results, config);
+            }
+        }
     }
-    
+}
 
+window.addEventListener('load', function() {
+    console.log('Page has finished loading!');
+    check_website();
 });
 
-// table = courses[0].querySelector('div.m-auto.space-y-4 > div.mt-3.overflow-x-auto.rounded.p-4.bg-gray-50 > table.w-full.min-w-fit.table-auto')
-
-
+check_website();
