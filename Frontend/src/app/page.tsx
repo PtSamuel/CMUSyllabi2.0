@@ -41,6 +41,10 @@ export default function HomePage() {
   const searchSyllabus = async (search: string) => {
     const res = await fetch(`http://3.230.154.38:3000/api/find_course?course_number=${search}`);
     const data = await res.json();
+    if (data.length === undefined) {
+      setResults([]);
+      return;
+    }
     setResults(data);
     setSemester(new Set());
   };
