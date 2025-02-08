@@ -7,6 +7,7 @@ const nextConfig = {
   distDir: 'docs',
   reactStrictMode: true,
   swcMinify: true,
+  basePath: '/CMUSyllabi2.0',
 
   webpack(config) {
     // Grab the existing rule that handles SVG imports
