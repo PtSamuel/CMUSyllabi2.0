@@ -3,19 +3,10 @@ const nextConfig = {
   eslint: {
     dirs: ['src'],
   },
-
+  output: 'export',
+  distDir: 'docs',
   reactStrictMode: true,
   swcMinify: true,
-
-  // Uncoment to add domain whitelist
-  // images: {
-  //   remotePatterns: [
-  //     {
-  //       protocol: 'https',
-  //       hostname: 'res.cloudinary.com',
-  //     },
-  //   ]
-  // },
 
   webpack(config) {
     // Grab the existing rule that handles SVG imports

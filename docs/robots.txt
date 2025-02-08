@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://PtSamuel.github.io/CMUSyllabi2.0
+
+# Sitemaps
+Sitemap: https://PtSamuel.github.io/CMUSyllabi2.0/sitemap.xml
