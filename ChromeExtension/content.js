@@ -20,6 +20,49 @@ function get_acronym(semester_name) {
     return acronym;
 }
 
+function add_syllabus_links(offerings, syllabus_entries) {
+    let current;
+    let count = 0;
+    for(let i = 0; i < offerings.length; i++) {
+        offering = offerings[i];
+        semester = offering.children[0];
+        semester_name = semester.innerHTML;
+        
+        const acronym = get_acronym(semester_name);
+        if(acronym === undefined) {
+            console.error(`Unable to process semester name: ${semester_name}`);
+            continue;
+        }
+        
+        if(current === undefined) {
+            current = acronym;
+            count = 0;
+        } else if(current == acronym) {
+            count += 1;
+        } else {
+            current = acronym;
+            count = 0;
+        }
+        const filtered = syllabus_entries.filter(entry => entry.semester == acronym);
+        
+        if(filtered.length == 0) {
+            const substitute = syllabus_entries.filter(
+                entry => entry.semester[0] == current[0]
+            );
+            if(count < substitute.length) {
+                console.log(count, substitute[count]);
+                semester.innerHTML = `<a class="letter-container substitute" target="_blank" href=${substitute[count].syllabus_href}>S</a> ${semester_name}`;
+            }
+
+        } else {
+            if(count < filtered.length) {
+                console.log(count, filtered[count]);
+                semester.innerHTML = `<a class="letter-container match" target="_blank" href=${filtered[count].syllabus_href}>S</a> ${semester_name}`;
+            }
+        }
+    }
+}
+
 function populate_table(course_number, table) {
     let tbody = table.querySelector('tbody');            
     if(! tbody) {
@@ -44,47 +87,7 @@ function populate_table(course_number, table) {
         if (response.data) {
             console.log(`${course_number}: ${response.data.length} syllabus entries.`);
             const syllabus_entries = response.data;
-            
-            let current;
-            let count = 0;
-            for(let i = 0; i < offerings.length; i++) {
-                offering = offerings[i];
-                semester = offering.children[0];
-                semester_name = semester.innerHTML;
-                
-                const acronym = get_acronym(semester_name);
-                if(acronym === undefined) {
-                    console.error(`Unable to process semester name: ${semester_name}`);
-                    continue;
-                }
-                
-                if(current === undefined) {
-                    current = acronym;
-                    count = 0;
-                } else if(current == acronym) {
-                    count += 1;
-                } else {
-                    current = acronym;
-                    count = 0;
-                }
-                const filtered = syllabus_entries.filter(entry => entry.semester == acronym);
-                
-                if(filtered.length == 0) {
-                    const substitute = syllabus_entries.filter(
-                        entry => entry.semester[0] == current[0]
-                    );
-                    if(count < substitute.length) {
-                        console.log(count, substitute[count]);
-                        semester.innerHTML = `<a class="letter-container substitute" target="_blank" href=${substitute[count].syllabus_href}>S</a> ${semester_name}`;
-                    }
-
-                } else {
-                    if(count < filtered.length) {
-                        console.log(count, filtered[count]);
-                        semester.innerHTML = `<a class="letter-container match" target="_blank" href=${filtered[count].syllabus_href}>S</a> ${semester_name}`;
-                    }
-                }
-            }
+            add_syllabus_links(offerings, syllabus_entries);
         } else {
             console.error('Error:', response.error);
         }
