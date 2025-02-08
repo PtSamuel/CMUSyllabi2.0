@@ -1,0 +1,15 @@
+{
+    "manifest_version": 3,
+    "name": "CMUSyllabi",
+    "version": "1.0",
+    "description": "This extension supplements CMUCourses with links to available syllabi.",
+    "permissions": ["activeTab"],
+    "background": {},
+    "content_scripts": [
+      {
+        "matches": ["<all_urls>"],
+        "js": ["content.js"],
+        "css": ["style.css"]
+      }
+    ]
+  }
