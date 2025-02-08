@@ -86,15 +86,22 @@ function populate_table(course_number, table) {
                     count = 0;
                 }
                 const filtered = syllabus_entries.filter(entry => entry.semester == acronym);
-
+                
                 if(filtered.length == 0) {
-                    continue;
+                    const substitute = syllabus_entries.filter(
+                        entry => entry.semester[0] == current[0]
+                    );
+                    if(count < substitute.length) {
+                        console.log(count, substitute[count]);
+                        semester.innerHTML = `<a class="letter-container substitute" href=${substitute[count].syllabus_href}>S</a> ${semester_name}`;
+                    }
+
                 } else {
                     if(count < filtered.length) {
                         console.log(count, filtered[count]);
                     }
-                    console.log(`<a class="letter-container" href=${filtered[count].syllabus_href}>Syllabus</a> ${semester_name}`);
-                    semester.innerHTML = `<a class="letter-container" href=${filtered[count].syllabus_href}>Syllabus</a> ${semester_name}`;
+                    // console.log(`<a class="letter-container" href=${filtered[count].syllabus_href}>S</a> ${semester_name}`);
+                    semester.innerHTML = `<a class="letter-container match" href=${filtered[count].syllabus_href}>S</a> ${semester_name}`;
                 }
                 
                 // semester.innerHTML = "hello";

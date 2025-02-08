@@ -6,10 +6,17 @@
 
 .letter-container {
     display: inline-block;   /* Makes the container fit the letter */
-    padding: 10px 15px;      /* Adds space around the letter */
-    border-radius: 10px;     /* Round corners */
-    background-color: #3498db;  /* Background color */
+    padding: 0px 5px;      /* Adds space around the letter */
+    border-radius: 5px;     /* Round corners */
     color: white;            /* Text color */
     font-weight: bold;       /* Make the letter bold (optional) */
     text-align: center;      /* Centers the letter inside */
+}
+
+.match {
+    background-color: #5ed8aa;  /* Background color */
+}
+
+.substitute {
+    background-color: #6ccef5;  /* Background color */
 }
