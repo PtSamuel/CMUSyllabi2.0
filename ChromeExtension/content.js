@@ -76,11 +76,8 @@ function populate_table(course_number, table) {
                     if(count < filtered.length) {
                         console.log(count, filtered[count]);
                     }
-                    // console.log(`<a class="letter-container" href=${filtered[count].syllabus_href}>S</a> ${semester_name}`);
                     semester.innerHTML = `<a class="letter-container match" target="_blank" href=${filtered[count].syllabus_href}>S</a> ${semester_name}`;
                 }
-                
-                // semester.innerHTML = "hello";
             }
         } else {
             console.error('Error:', response.error);
@@ -98,13 +95,6 @@ function get_course_info(course) {
 }
 
 function run() {
-    
-    // This throws an error but seems unnecessary.
-    // const link = document.createElement('link');
-    // link.rel = 'stylesheet';
-    // link.type = 'text/css';
-    // link.href = chrome.runtime.getURL('style.css'); // URL to the CSS file
-    // document.head.appendChild(link);
 
     setTimeout(() => {
 
@@ -118,33 +108,23 @@ function run() {
 
 }
 
-let observer;
+window.addEventListener('load', function() {
 
-function check_website() {
+    console.log('Page has finished loading!');
+    
+    let timeout_id;
     if(document.location.href.startsWith(CMUCourses_href)) {
         search_results = document.querySelector('div.flex-1.overflow-y-auto > div.p-6')
-        
-        console.log(search_results);
-        if(search_results.length > 0) {
-            if(!observer) {
-                observer = new MutationObserver(() => {
-                    console.log('Dynamic content has changed!');
-                    console.log('Wait for a bit.');
-                    setTimeout(() => {
-                        run();
-                    }, 500);
-                    
-                });
-                const config = { childList: true, subtree: true };
-                observer.observe(search_results, config);
-            }
-        }
-    }
-}
-
-window.addEventListener('load', function() {
-    console.log('Page has finished loading!');
-    check_website();
+        const observer = new MutationObserver(() => {
+            console.log('Dynamic content has changed!');
+            console.log('Wait for a bit.');
+            clearTimeout(timeout_id);
+            timeout_id = setTimeout(() => {
+                run();
+            }, 500);
+        });
+        const config = { childList: true, subtree: true };
+        observer.observe(search_results, config);
+    } 
 });
 
-check_website();
