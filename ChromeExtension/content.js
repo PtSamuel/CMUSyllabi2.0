@@ -21,18 +21,21 @@ function get_acronym(semester_name) {
 }
 
 function populate_table(course_number, table) {
-    let syllabus_entries;
+    let tbody = table.querySelector('tbody');            
+    let offerings = tbody.children;
+    if(offerings.length > 0) {
+        if(offerings[0].children[0].innerHTML.indexOf('</a>') != -1) {
+            return;
+        }
+    }
+
     chrome.runtime.sendMessage({ course_number: course_number }, (response) => {
         if(response === undefined) {
             return;
         }
         if (response.data) {
-            console.log(`Data: ${response.data.length} syllabus entries.`);
-            syllabus_entries = response.data;
-
-            thead = table.querySelector('thead');
-            tbody = table.querySelector('tbody');            
-            offerings = tbody.children;
+            console.log(`${course_number}: ${response.data.length} syllabus entries.`);
+            const syllabus_entries = response.data;
             
             let current;
             let count = 0;
@@ -41,16 +44,11 @@ function populate_table(course_number, table) {
                 semester = offering.children[0];
                 semester_name = semester.innerHTML;
                 
-                if(semester_name.indexOf('</a>') != -1) {
-                    continue;
-                }
                 const acronym = get_acronym(semester_name);
                 if(acronym === undefined) {
                     console.error(`Unable to process semester name: ${semester_name}`);
                     continue;
                 }
-                
-                console.log(`${course_number}: ${acronym}`);
                 
                 if(current === undefined) {
                     current = acronym;
@@ -83,7 +81,6 @@ function populate_table(course_number, table) {
             console.error('Error:', response.error);
         }
     });
-    console.log('Done sending message.');
 }
 
 function get_course_info(course) {
@@ -95,17 +92,12 @@ function get_course_info(course) {
 }
 
 function run() {
-
-    setTimeout(() => {
-
-        console.log('Arriving at CMUCourses.');
-        courses = document.querySelectorAll('div.bg-white.border-gray-100.rounded.border.p-6')
+    courses = document.querySelectorAll('div.bg-white.border-gray-100.rounded.border.p-6')
+    if(courses.length > 0) {
         courses.forEach(course => {
             get_course_info(course);
         });
-
-    }, 1000);
-
+    }
 }
 
 window.addEventListener('load', function() {
@@ -121,7 +113,7 @@ window.addEventListener('load', function() {
             clearTimeout(timeout_id);
             timeout_id = setTimeout(() => {
                 run();
-            }, 500);
+            }, 1000);
         });
         const config = { childList: true, subtree: true };
         observer.observe(search_results, config);
