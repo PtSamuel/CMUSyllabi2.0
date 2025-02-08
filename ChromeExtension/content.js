@@ -22,9 +22,17 @@ function get_acronym(semester_name) {
 
 function populate_table(course_number, table) {
     let tbody = table.querySelector('tbody');            
+    if(! tbody) {
+        return;
+    }
     let offerings = tbody.children;
-    if(offerings.length > 0) {
-        if(offerings[0].children[0].innerHTML.indexOf('</a>') != -1) {
+
+    for(let i = 0; i < offerings.length; i++) {
+        offering = offerings[i];
+        semester = offering.children[0];
+        semester_name = semester.innerHTML;
+
+        if(offerings[i].children[0].innerHTML.indexOf('</a>') != -1) {
             return;
         }
     }
@@ -73,8 +81,8 @@ function populate_table(course_number, table) {
                 } else {
                     if(count < filtered.length) {
                         console.log(count, filtered[count]);
+                        semester.innerHTML = `<a class="letter-container match" target="_blank" href=${filtered[count].syllabus_href}>S</a> ${semester_name}`;
                     }
-                    semester.innerHTML = `<a class="letter-container match" target="_blank" href=${filtered[count].syllabus_href}>S</a> ${semester_name}`;
                 }
             }
         } else {
@@ -92,30 +100,37 @@ function get_course_info(course) {
 }
 
 function run() {
+
     courses = document.querySelectorAll('div.bg-white.border-gray-100.rounded.border.p-6')
     if(courses.length > 0) {
         courses.forEach(course => {
             get_course_info(course);
         });
     }
+
+
 }
 
 window.addEventListener('load', function() {
 
     console.log('Page has finished loading!');
     
-    let timeout_id;
     if(document.location.href.startsWith(CMUCourses_href)) {
+
+        let timeout_id;
+        const config = { childList: true, subtree: true };
+
         search_results = document.querySelector('div.flex-1.overflow-y-auto > div.p-6')
-        const observer = new MutationObserver(() => {
+        const observer = new MutationObserver((mutations, observerInstance) => {
             console.log('Dynamic content has changed!');
             console.log('Wait for a bit.');
             clearTimeout(timeout_id);
             timeout_id = setTimeout(() => {
+                observerInstance.disconnect();
                 run();
-            }, 1000);
+                observer.observe(search_results, config);
+            }, 2000);
         });
-        const config = { childList: true, subtree: true };
         observer.observe(search_results, config);
     } 
 });
