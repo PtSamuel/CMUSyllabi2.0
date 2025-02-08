@@ -1,30 +1,3 @@
-// const searchString = "example"; // The string to search and highlight
-
-// function highlightOccurrences(text) {
-//   const regex = new RegExp(`(${text})`, 'gi');
-//   const bodyText = document.body.innerHTML;
-//   document.body.innerHTML = bodyText.replace(regex, '<span class="highlight">$1</span>');
-// }
-
-// function observeDOMChanges() {
-//   const observer = new MutationObserver(() => {
-//     highlightOccurrences(searchString); // Reapply the highlight when the DOM changes
-//   });
-
-//   // Observe changes to the body of the document
-//   observer.observe(document.body, {
-//     childList: true,
-//     subtree: true, // Observe changes within the entire body (not just direct children)
-//     characterData: true,
-//   });
-// }
-
-// // Initial highlighting on page load
-// highlightOccurrences(searchString);
-
-// // Start observing DOM changes
-// observeDOMChanges();
-
 CMUCourses_href = 'https://courses.scottylabs.org/'
 
 function get_acronym(semester_name) {
@@ -68,9 +41,12 @@ function populate_table(course_number, table) {
                 semester = offering.children[0];
                 semester_name = semester.innerHTML;
                 
+                if(semester_name.indexOf('</a>') != -1) {
+                    continue;
+                }
                 const acronym = get_acronym(semester_name);
                 if(acronym === undefined) {
-                    console.error('Unable to process semester name: ${semester_name}');
+                    console.error(`Unable to process semester name: ${semester_name}`);
                     continue;
                 }
                 
@@ -121,13 +97,14 @@ function get_course_info(course) {
     populate_table(course_number, table);
 }
 
-if(document.location.href.startsWith(CMUCourses_href)) {
-
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.type = 'text/css';
-    link.href = chrome.runtime.getURL('style.css'); // URL to the CSS file
-    document.head.appendChild(link);
+function run() {
+    
+    // This throws an error but seems unnecessary.
+    // const link = document.createElement('link');
+    // link.rel = 'stylesheet';
+    // link.type = 'text/css';
+    // link.href = chrome.runtime.getURL('style.css'); // URL to the CSS file
+    // document.head.appendChild(link);
 
     setTimeout(() => {
 
@@ -138,7 +115,29 @@ if(document.location.href.startsWith(CMUCourses_href)) {
         });
 
     }, 1000);
+
 }
+
+window.addEventListener('load', function() {
+    // Call your function when the page fully loads (after redirect/refresh)
+    console.log('Page has finished loading!');
+
+    if(document.location.href.startsWith(CMUCourses_href)) {
+        search_results = document.querySelector('div.flex-1.overflow-y-auto > div.p-6')
+        const observer = new MutationObserver(() => {
+            console.log('Dynamic content has changed!');
+            console.log('Wait for a bit.');
+            setTimeout(() => {
+                run();
+            }, 500);
+           
+        });
+        const config = { childList: true, subtree: true };
+        observer.observe(search_results, config);
+    }
+    
+
+});
 
 // table = courses[0].querySelector('div.m-auto.space-y-4 > div.mt-3.overflow-x-auto.rounded.p-4.bg-gray-50 > table.w-full.min-w-fit.table-auto')
 
