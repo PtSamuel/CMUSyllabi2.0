@@ -28,24 +28,26 @@
 CMUCourses_href = 'https://courses.scottylabs.org/'
 
 
-function populate_table(table) {
-    thead = table.querySelector('thead')
-    tbody = table.querySelector('tbody')
+function populate_table(course_number, table) {
+    thead = table.querySelector('thead');
+    tbody = table.querySelector('tbody');
     
-    offerings = tbody.children
+    offerings = tbody.children;
 
     for(let i = 0; i < offerings.length; i++) {
-        offering = offerings[i]
+        offering = offerings[i];
 
         semester = offering.children[0];
-        semester.innerHTML = `<a href="/">S</a> ${semester.innerHTML}`;
+        semester.innerHTML = `<a href="/">Syllabus</a> ${semester.innerHTML}`;
     }
 }
 
 function get_course_info(course) {
     course_data = course.children[0];
+    course_number = course_data.querySelector('div > div > a > div > span')
+    course_number = course_number.innerHTML.replaceAll('-', '');
     table = course.children[1];
-    populate_table(table);
+    populate_table(course_number, table);
 }
 
 if(document.location.href.startsWith(CMUCourses_href)) {
