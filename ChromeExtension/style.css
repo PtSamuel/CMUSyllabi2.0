@@ -3,3 +3,13 @@
     color: black;
     font-weight: bold;
 }
+
+.letter-container {
+    display: inline-block;   /* Makes the container fit the letter */
+    padding: 10px 15px;      /* Adds space around the letter */
+    border-radius: 10px;     /* Round corners */
+    background-color: #3498db;  /* Background color */
+    color: white;            /* Text color */
+    font-weight: bold;       /* Make the letter bold (optional) */
+    text-align: center;      /* Centers the letter inside */
+}

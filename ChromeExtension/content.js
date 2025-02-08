@@ -27,19 +27,83 @@
 
 CMUCourses_href = 'https://courses.scottylabs.org/'
 
+function get_acronym(semester_name) {
+    let acronym;
+    try {
+        const [term, year] = semester_name.split(' ').filter(Boolean);
+        switch (term) {
+            case 'Fall':
+                acronym = `F${year.substring(2, 4)}`;
+                break;
+            case 'Spring':
+                acronym = `S${year.substring(2, 4)}`;
+                break;
+            default:
+                break;
+        }
+    } catch {
+
+    }
+    return acronym;
+}
 
 function populate_table(course_number, table) {
-    thead = table.querySelector('thead');
-    tbody = table.querySelector('tbody');
-    
-    offerings = tbody.children;
+    let syllabus_entries;
+    chrome.runtime.sendMessage({ course_number: course_number }, (response) => {
+        if(response === undefined) {
+            return;
+        }
+        if (response.data) {
+            console.log(`Data: ${response.data.length} syllabus entries.`);
+            syllabus_entries = response.data;
 
-    for(let i = 0; i < offerings.length; i++) {
-        offering = offerings[i];
+            thead = table.querySelector('thead');
+            tbody = table.querySelector('tbody');            
+            offerings = tbody.children;
+            
+            let current;
+            let count = 0;
+            for(let i = 0; i < offerings.length; i++) {
+                offering = offerings[i];
+                semester = offering.children[0];
+                semester_name = semester.innerHTML;
+                
+                const acronym = get_acronym(semester_name);
+                if(acronym === undefined) {
+                    console.error('Unable to process semester name: ${semester_name}');
+                    continue;
+                }
+                
+                console.log(`${course_number}: ${acronym}`);
+                
+                if(current === undefined) {
+                    current = acronym;
+                    count = 0;
+                } else if(current == acronym) {
+                    count += 1;
+                } else {
+                    current = acronym;
+                    count = 0;
+                }
+                const filtered = syllabus_entries.filter(entry => entry.semester == acronym);
 
-        semester = offering.children[0];
-        semester.innerHTML = `<a href="/">Syllabus</a> ${semester.innerHTML}`;
-    }
+                if(filtered.length == 0) {
+                    continue;
+                } else {
+                    if(count < filtered.length) {
+                        console.log(count, filtered[count]);
+                    }
+                    console.log(`<a class="letter-container" href=${filtered[count].syllabus_href}>Syllabus</a> ${semester_name}`);
+                    semester.innerHTML = `<a class="letter-container" href=${filtered[count].syllabus_href}>Syllabus</a> ${semester_name}`;
+                }
+                
+                // semester.innerHTML = "hello";
+            }
+        } else {
+            console.error('Error:', response.error);
+        }
+    });
+    console.log('Done sending message.');
 }
 
 function get_course_info(course) {
@@ -51,6 +115,13 @@ function get_course_info(course) {
 }
 
 if(document.location.href.startsWith(CMUCourses_href)) {
+
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = chrome.runtime.getURL('style.css'); // URL to the CSS file
+    document.head.appendChild(link);
+
     setTimeout(() => {
 
         console.log('Arriving at CMUCourses.');
