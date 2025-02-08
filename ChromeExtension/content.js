@@ -69,7 +69,7 @@ function populate_table(course_number, table) {
                     );
                     if(count < substitute.length) {
                         console.log(count, substitute[count]);
-                        semester.innerHTML = `<a class="letter-container substitute" href=${substitute[count].syllabus_href}>S</a> ${semester_name}`;
+                        semester.innerHTML = `<a class="letter-container substitute" target="_blank" href=${substitute[count].syllabus_href}>S</a> ${semester_name}`;
                     }
 
                 } else {
@@ -77,7 +77,7 @@ function populate_table(course_number, table) {
                         console.log(count, filtered[count]);
                     }
                     // console.log(`<a class="letter-container" href=${filtered[count].syllabus_href}>S</a> ${semester_name}`);
-                    semester.innerHTML = `<a class="letter-container match" href=${filtered[count].syllabus_href}>S</a> ${semester_name}`;
+                    semester.innerHTML = `<a class="letter-container match" target="_blank" href=${filtered[count].syllabus_href}>S</a> ${semester_name}`;
                 }
                 
                 // semester.innerHTML = "hello";
