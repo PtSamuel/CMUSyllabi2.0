@@ -15,8 +15,8 @@ api_router.get('/find_course', (req, res) => {
 });
 
 api_router.get('/find', (req, res) => {
-	const { course_title, department, semester } = req.query;
-	find(course_title, department, semester, (result) => { res.json(result); });
+	const { course_title, department, semester, limit, page } = req.query;
+	find(course_title, department, semester, limit, page, (result) => { res.json(result); });
 });
 
 module.exports = api_router;

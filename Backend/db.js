@@ -41,14 +41,15 @@ function find_course(course_number, callback) {
     });
 }
 
-function find(course_title, department, semester, callback) {
+function find(course_title, department, semester, limit, page, callback) {
     if(course_title === undefined) {
         json = { argument_err: `Argument course_title (${course_title}) is empty` };
         console.log(json);
         callback(json);
         return;
     }
-    const sql = `
+
+    let sql = `
         select 
             semesters.acronym as semester, 
             departments.acronym as department, 
@@ -59,11 +60,26 @@ function find(course_title, department, semester, callback) {
         inner join departments on courses.department_id = departments.department_id 
         inner join semesters on departments.semester_id = semesters.semester_id 
         where courses.name like ? 
-            and (departments.acronym = ? or ? is null) 
-            and (semesters.acronym = ? or ? is null) 
     `;
-    console.log(sql);
-    db.all(sql, [`%${course_title}%`, department, department, semester, semester], (err, rows) => {
+    let params = [`%${course_title}%`];
+    if(department) {
+        sql += ' and department = ?';
+        params.push(department);
+    }
+    if(semester) {
+        sql += ' and semester = ?';
+        params.push(semester);
+    }
+    if(limit && page) {
+        page_size = parseInt(limit);
+        page_number = parseInt(page);
+
+        if(limit > 0 && page > 0) {
+            sql += ` limit ${page_size} OFFSET ${(page_number - 1) * page_size}`;
+        }
+    }
+    
+    db.all(sql, params, (err, rows) => {
         if(err) {
             json = { database_err: err };
             console.log(json);
