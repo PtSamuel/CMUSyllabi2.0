@@ -3,5 +3,5 @@ export const siteConfig = {
   description:
     'One stop solution for finding the syllabus of CMU courses',
   /** Without additional '/' on the end, e.g. https://theodorusclarence.com */
-  url: 'https://tsnext-tw.thcl.dev',
+  url: 'https://ptsamuel.github.io/CMUSyllabi2.0',
 };
