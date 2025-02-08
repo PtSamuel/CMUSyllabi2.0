@@ -41,6 +41,41 @@ function find_course(course_number, callback) {
     });
 }
 
+function find(course_title, department, semester, callback) {
+    if(course_title === undefined) {
+        json = { argument_err: `Argument course_title (${course_title}) is empty` };
+        console.log(json);
+        callback(json);
+        return;
+    }
+    const sql = `
+        select 
+            semesters.acronym as semester, 
+            departments.acronym as department, 
+            courses.name as course_number, 
+            courses.syllabus_category as category, 
+            courses.href as syllabus_href 
+        from courses 
+        inner join departments on courses.department_id = departments.department_id 
+        inner join semesters on departments.semester_id = semesters.semester_id 
+        where courses.name like ? 
+            and (departments.acronym = ? or ? is null) 
+            and (semesters.acronym = ? or ? is null) 
+    `;
+    console.log(sql);
+    db.all(sql, [`%${course_title}%`, department, department, semester, semester], (err, rows) => {
+        if(err) {
+            json = { database_err: err };
+            console.log(json);
+            callback(json);
+        } else {
+            console.log(rows[0]);
+            callback(rows);
+        }
+    });
+}
+
 module.exports = {
     find_course,
+    find,
 };
